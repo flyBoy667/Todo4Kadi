@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from app.api.deps import SessionDep
 from app.schemas.todo_schemas import TodoCreate, TodoUpdate, TodoRead
@@ -9,13 +10,23 @@ from sqlalchemy.exc import IntegrityError
 todo_router = APIRouter()
 
 
+@todo_router.get("/todos", response_model=List[TodoRead])
+def read_all_todos(session: SessionDep):
+    todos = session.query(Todo).all()
+
+    if not todos:
+        return []
+
+    return todos
+
+
 @todo_router.post("/todos", response_model=TodoRead)
-def create_todo(todo: TodoCreate, session: Session = Depends(SessionDep)):
+def create_todo(todo: TodoCreate, session: SessionDep):
     try:
         todo = Todo(
             title=todo.title,
             description=todo.description,
-            is_completed=todo.is_completed,
+            is_completed=False,
             user_id=todo.user_id,
         )
         session.add(todo)

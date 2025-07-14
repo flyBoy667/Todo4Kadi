@@ -2,19 +2,21 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.api.deps import SessionDep
 from app.schemas.user_schemas import UserCreate, UserUpdate, UserRead
 from app.models import User
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-user_router = APIRouter()
+user_router = APIRouter(prefix="/users", tags=["users"])
 
 
-@user_router.get("/users", response_model=list[UserRead])
+@user_router.get("/", response_model=list[UserRead])
 def read_users(session: SessionDep):
     users = session.query(User).all()
+
+    if not users:
+        return []
     return users
 
 
-@user_router.post("/users", response_model=UserRead)
+@user_router.post("/", response_model=UserRead)
 def create_user(user: UserCreate, session: SessionDep):
     try:
         user_obj = User(full_name=user.full_name, email=user.email)
@@ -26,7 +28,7 @@ def create_user(user: UserCreate, session: SessionDep):
         raise HTTPException(status_code=400, detail="User already exists")
 
 
-@user_router.get("/users/{user_id}", response_model=UserRead)
+@user_router.get("/{user_id}", response_model=UserRead)
 def read_user(user_id: int, session: SessionDep):
     user = session.query(User).filter(User.id == user_id).first()
     if not user:
@@ -34,7 +36,7 @@ def read_user(user_id: int, session: SessionDep):
     return user
 
 
-@user_router.put("/users/{user_id}", response_model=UserRead)
+@user_router.put("/{user_id}", response_model=UserRead)
 def update_user(user_id: int, user: UserUpdate, session: SessionDep):
     user_obj = session.query(User).filter(User.id == user_id).first()
     if not user_obj:
@@ -46,7 +48,7 @@ def update_user(user_id: int, user: UserUpdate, session: SessionDep):
     return user_obj
 
 
-@user_router.delete("/users/{user_id}", response_model=UserRead)
+@user_router.delete("/{user_id}", response_model=UserRead)
 def delete_user(user_id: int, session: SessionDep):
     user = session.query(User).filter(User.id == user_id).first()
     if not user:
