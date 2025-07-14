@@ -10,4 +10,4 @@ class User(Base):
     full_name = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False)
 
-    todos = relationship("Todo", back_populates="user")
+    # todos = relationship("Todo", back_populates="user")

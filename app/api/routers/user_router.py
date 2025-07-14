@@ -7,13 +7,17 @@ from sqlalchemy.exc import IntegrityError
 
 user_router = APIRouter()
 
+
+@user_router.get("/users", response_model=list[UserRead])
+def read_users(session: SessionDep):
+    users = session.query(User).all()
+    return users
+
+
 @user_router.post("/users", response_model=UserRead)
-def create_user(user: UserCreate, session: Session = Depends(SessionDep)):
+def create_user(user: UserCreate, session: SessionDep):
     try:
-        user_obj = User(
-            full_name=user.full_name,
-            email=user.email
-        )
+        user_obj = User(full_name=user.full_name, email=user.email)
         session.add(user_obj)
         session.commit()
         session.refresh(user_obj)
@@ -21,15 +25,17 @@ def create_user(user: UserCreate, session: Session = Depends(SessionDep)):
     except IntegrityError:
         raise HTTPException(status_code=400, detail="User already exists")
 
+
 @user_router.get("/users/{user_id}", response_model=UserRead)
-def read_user(user_id: int, session: Session = Depends(SessionDep)):
+def read_user(user_id: int, session: SessionDep):
     user = session.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+
 @user_router.put("/users/{user_id}", response_model=UserRead)
-def update_user(user_id: int, user: UserUpdate, session: Session = Depends(SessionDep)):
+def update_user(user_id: int, user: UserUpdate, session: SessionDep):
     user_obj = session.query(User).filter(User.id == user_id).first()
     if not user_obj:
         raise HTTPException(status_code=404, detail="User not found")
@@ -39,11 +45,12 @@ def update_user(user_id: int, user: UserUpdate, session: Session = Depends(Sessi
     session.refresh(user_obj)
     return user_obj
 
+
 @user_router.delete("/users/{user_id}", response_model=UserRead)
-def delete_user(user_id: int, session: Session = Depends(SessionDep)):
+def delete_user(user_id: int, session: SessionDep):
     user = session.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     session.delete(user)
     session.commit()
-    return user 
+    return user
