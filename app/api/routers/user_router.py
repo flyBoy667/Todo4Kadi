@@ -4,7 +4,7 @@ from app.schemas.user_schemas import UserCreate, UserUpdate, UserRead
 from app.models import User
 from sqlalchemy.exc import IntegrityError
 
-user_router = APIRouter(prefix="/users", tags=["users"])
+user_router = APIRouter(prefix="/user", tags=["user"])
 
 
 @user_router.get("/", response_model=list[UserRead])

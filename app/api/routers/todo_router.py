@@ -7,10 +7,10 @@ from app.db.base import engine
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-todo_router = APIRouter()
+todo_router = APIRouter(prefix="/todo", tags=["todo"])
 
 
-@todo_router.get("/todos", response_model=List[TodoRead])
+@todo_router.get("/", response_model=List[TodoRead])
 def read_all_todos(session: SessionDep):
     todos = session.query(Todo).all()
 
@@ -20,7 +20,7 @@ def read_all_todos(session: SessionDep):
     return todos
 
 
-@todo_router.post("/todos", response_model=TodoRead)
+@todo_router.post("/", response_model=TodoRead)
 def create_todo(todo: TodoCreate, session: SessionDep):
     try:
         todo = Todo(
@@ -37,7 +37,7 @@ def create_todo(todo: TodoCreate, session: SessionDep):
         raise HTTPException(status_code=400, detail="Todo already exists")
 
 
-@todo_router.get("/todos/{todo_id}", response_model=TodoRead)
+@todo_router.get("/{todo_id}", response_model=TodoRead)
 def read_todo(todo_id: int, session: Session = Depends(SessionDep)):
     todo = session.query(Todo).filter(Todo.id == todo_id).first()
     if not todo:
@@ -45,7 +45,7 @@ def read_todo(todo_id: int, session: Session = Depends(SessionDep)):
     return todo
 
 
-@todo_router.put("/todos/{todo_id}", response_model=TodoRead)
+@todo_router.put("/{todo_id}", response_model=TodoRead)
 def update_todo(todo_id: int, todo: TodoUpdate, session: Session = Depends(SessionDep)):
     todo = session.query(Todo).filter(Todo.id == todo_id).first()
     if not todo:
@@ -58,7 +58,7 @@ def update_todo(todo_id: int, todo: TodoUpdate, session: Session = Depends(Sessi
     return todo
 
 
-@todo_router.delete("/todos/{todo_id}", response_model=TodoRead)
+@todo_router.delete("/{todo_id}", response_model=TodoRead)
 def delete_todo(todo_id: int, session: Session = Depends(SessionDep)):
     todo = session.query(Todo).filter(Todo.id == todo_id).first()
     if not todo:
