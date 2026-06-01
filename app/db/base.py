@@ -1,11 +1,10 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
+from app.db.config import DATABASE_URL
 
-engine = create_engine("postgresql://postgres:root@localhost/todo4kadi")
-
+engine = create_engine(DATABASE_URL)
 
 Base = declarative_base()
 
-
-from app.models import User, Todo
+from app.models import User, Todo  # noqa: E402, F401
